@@ -3,18 +3,39 @@ class SnakeGame {
         this.canvas = document.getElementById('game');
         this.context = this.canvas.getContext('2d');
         document.addEventListener("keydown", this.onKeyPress.bind(this));
+        this.canvas.addEventListener("mousedown", this.getMousePosition.bind(this))
+
+        function sound(src) {
+            this.sound = document.createElement("audio");
+            this.sound.src = src;
+            this.sound.setAttribute("preload", "auto");
+            this.sound.setAttribute("controls", "none");
+            this.sound.style.display = "none";
+            document.body.appendChild(this.sound);
+            this.play = function() {
+                this.sound.play();
+            }
+            this.stop = function() {
+                this.sound.pause();
+            }
+        }
+        this.mysound = new sound("ses2.mp3");
+        this.Screamsound = new sound("Scream.mp3");
 
     }
 
     init() {
+        this.speed = 7;
         this.positionX = this.positionY = 10;
         this.appleX = this.appleY = 5;
         this.tailSize = 5;
         this.trail = [];
         this.gridSize = this.tileCount = 20;
-        this.velocityX = this.velocityY = 0;
+        this.velocityX = 0
+        this.velocityY = 1;
+        this.timerCount = 0;
 
-        this.timer = setInterval(this.loop.bind(this), 1000 / 15)
+        this.timer = setInterval(this.loop.bind(this), 1000 / this.speed)
     }
 
     reset() {
@@ -25,8 +46,58 @@ class SnakeGame {
     loop() {
         this.update();
         this.draw();
+
     }
+
+    getMousePosition(event) {
+        //let rect = canvas.getBoundingClientRect();
+        var x = event.clientX;
+        var y = event.clientY;
+        console.log("Coordinate x: " + x,
+            "Coordinate y: " + y);
+
+        if (x >= 10 && x <= 85 && y >= 125 && y <= 270) {
+            this.velocityX = -1;
+            this.velocityY = 0;
+        }
+
+        if (x >= 115 && x <= 300 && y >= 15 && y <= 90) {
+            this.velocityX = 0;
+            this.velocityY = -1;
+        }
+
+        if (x >= 315 && x <= 390 && y >= 125 && y <= 270) {
+            this.velocityX = 1;
+            this.velocityY = 0;
+        }
+
+        if (x >= 115 && x <= 300 && y >= 315 && y <= 390) {
+            this.velocityX = 0;
+            this.velocityY = 1;
+        }
+    }
+
+
+
+
+
     update() {
+
+
+
+        // this.timerCount += 1;
+        // if (this.timerCount / 700 == 1) {
+        //     if (this.speed >= 10) {
+        //         this.speed = 10;
+        //     } else {
+        //         this.speed += 1;
+        //     }
+        //     this.timerCount = 0;
+        //     console.log("object");
+        //     this.init();
+        // }
+        // console.log(this.speed);
+
         this.positionX += this.velocityX;
         this.positionY += this.velocityY;
 
@@ -46,6 +117,7 @@ class SnakeGame {
 
         this.trail.forEach(t => {
             if (this.positionX === t.positionX && this.positionY === t.positionY) {
+                this.Screamsound.play();
                 this.reset();
             }
         });
@@ -56,6 +128,7 @@ class SnakeGame {
             this.trail.shift();
         }
         if (this.appleX === this.positionX && this.appleY === this.positionY) {
+            this.mysound.play();
             this.tailSize++;
             this.appleX = Math.floor(Math.random() * this.tileCount);
             this.appleY = Math.floor(Math.random() * this.tileCount);
@@ -69,6 +142,8 @@ class SnakeGame {
         this.context.fillStyle = "white";
         this.context.font = "20px Arial";
         this.context.fillText(this.tailSize - 5, 20, 40);
+
+
 
         this.context.fillStyle = "red";
         this.trail.forEach(t => {
@@ -99,7 +174,13 @@ class SnakeGame {
             this.velocityX = 0;
             this.velocityY = 1;
         }
+
+
+
+
     }
+
+
 }
 
 const game = new SnakeGame();
